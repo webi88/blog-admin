@@ -16,9 +16,9 @@ import {
   Bold, Italic, Underline as UIcon, Strikethrough, Code, Link as LinkIcon,
   AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Quote,
   Minus, Table as TableIcon, Image as ImgIcon, Undo, Redo, Heading1, Heading2, Heading3,
-  Highlighter, Code2,
+  Highlighter, Code2, Globe,
 } from "lucide-react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { uploadImage } from "@/lib/supabase";
 
 interface Props {
@@ -46,6 +46,7 @@ const Sep = () => <div className="w-px h-5 bg-gray-200 mx-1" />;
 
 export default function TiptapEditor({ content, onChange, site }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -65,17 +66,48 @@ export default function TiptapEditor({ content, onChange, site }: Props) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !editor) return;
+  const insertImageFromFile = useCallback(async (file: File) => {
+    if (!editor) return;
+    const toBase64 = (f: File): Promise<string> =>
+      new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
     try {
       const url = await uploadImage(file, site);
       editor.chain().focus().setImage({ src: url }).run();
     } catch {
-      alert("Error al subir imagen");
+      const b64 = await toBase64(file);
+      editor.chain().focus().setImage({ src: b64 }).run();
     }
-    e.target.value = "";
   }, [editor, site]);
+
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    for (const file of files) await insertImageFromFile(file);
+    e.target.value = "";
+  }, [insertImageFromFile]);
+
+  const handleImageUrl = useCallback(() => {
+    const url = window.prompt("URL de la imagen:");
+    if (url) editor?.chain().focus().setImage({ src: url }).run();
+  }, [editor]);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+    for (const file of files) await insertImageFromFile(file);
+  }, [insertImageFromFile]);
+
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const files = Array.from(e.clipboardData.files).filter(f => f.type.startsWith("image/"));
+    if (!files.length) return;
+    e.preventDefault();
+    for (const file of files) await insertImageFromFile(file);
+  }, [insertImageFromFile]);
 
   const addLink = useCallback(() => {
     const prev = editor?.getAttributes("link").href ?? "";
@@ -132,7 +164,8 @@ export default function TiptapEditor({ content, onChange, site }: Props) {
         <Btn title="Insertar imagen" onClick={() => fileRef.current?.click()}><ImgIcon className="w-4 h-4" /></Btn>
         <Btn title="Insertar tabla" onClick={addTable}><TableIcon className="w-4 h-4" /></Btn>
 
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+        <Btn title="Imagen desde URL" onClick={handleImageUrl}><Globe className="w-4 h-4" /></Btn>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
 
         {/* Word count */}
         <div className="ml-auto text-xs text-gray-400 pr-2">
@@ -140,8 +173,21 @@ export default function TiptapEditor({ content, onChange, site }: Props) {
         </div>
       </div>
 
-      {/* Editor area */}
-      <EditorContent editor={editor} className="min-h-[450px] cursor-text" />
+      {/* Editor area with drag & drop + paste */}
+      <div
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        onPaste={handlePaste}
+        className={`relative transition-colors ${dragging ? "bg-blue-50" : ""}`}
+      >
+        {dragging && (
+          <div className="absolute inset-0 z-10 border-2 border-dashed border-blue-400 rounded-b-xl flex items-center justify-center pointer-events-none">
+            <p className="text-blue-500 font-semibold text-sm">Suelta la imagen aquí</p>
+          </div>
+        )}
+        <EditorContent editor={editor} className="min-h-[450px] cursor-text" />
+      </div>
     </div>
   );
 }
