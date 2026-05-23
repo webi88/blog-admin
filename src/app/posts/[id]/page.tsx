@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowLeft, Save, Eye, EyeOff, Loader2, ImagePlus, X, Plus, Globe,
@@ -9,7 +9,7 @@ import {
 import { getPost, savePost, uploadImage, SITES, type Post } from "@/lib/supabase";
 import slugify from "slugify";
 
-const TiptapEditor = dynamic(() => import("@/components/TiptapEditor"), { ssr: false,
+const TiptapEditor = dynamicImport(() => import("@/components/TiptapEditor"), { ssr: false,
   loading: () => <div className="h-[450px] bg-gray-50 rounded-xl border border-gray-200 animate-pulse" />,
 });
 
