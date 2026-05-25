@@ -4,9 +4,9 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import dynamicImport from "next/dynamic";
 import Link from "next/link";
 import {
-  ArrowLeft, Save, Eye, EyeOff, Loader2, ImagePlus, X, Plus, Globe,
+  ArrowLeft, Save, Eye, EyeOff, Loader2, ImagePlus, X, Plus, Globe, AlertTriangle,
 } from "lucide-react";
-import { getPost, savePost, uploadImage, SITES, type Post } from "@/lib/supabase";
+import { getPost, savePost, uploadImage, SITES, isOfflineMode, type Post } from "@/lib/supabase";
 import slugify from "slugify";
 
 const TiptapEditor = dynamicImport(() => import("@/components/TiptapEditor"), { ssr: false,
@@ -97,6 +97,15 @@ export default function PostEditor() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Offline mode banner */}
+      {isOfflineMode && (
+        <div className="bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+          <p className="text-xs text-amber-700">
+            <strong>Modo sin conexión</strong> — Los artículos se guardan en este navegador. Configura Supabase para persistir en la nube.
+          </p>
+        </div>
+      )}
       {/* Top bar */}
       <header className="bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
         <Link href="/" className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
@@ -166,6 +175,16 @@ export default function PostEditor() {
                 className="flex-1 text-xs text-blue-600 border-none outline-none bg-transparent font-mono"
               />
             </div>
+          </div>
+
+          {/* Image-in-editor tip */}
+          <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-start gap-3">
+            <ImagePlus className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700 leading-relaxed">
+              <strong>Imágenes posicionadas:</strong> coloca el cursor en el texto donde quieras la imagen,
+              luego usa el botón <span className="font-mono bg-blue-100 px-1 rounded">📷</span> del editor.
+              También puedes <strong>arrastrar</strong> imágenes o <strong>pegar</strong> capturas (Cmd+V) directamente.
+            </p>
           </div>
 
           {/* Editor */}
@@ -261,7 +280,10 @@ export default function PostEditor() {
           {/* Extra images */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
             <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-700 text-sm">Imágenes adicionales</h3>
+              <div>
+                <h3 className="font-semibold text-gray-700 text-sm">Galería del artículo</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Arrástralas al editor para posicionarlas</p>
+              </div>
               <button
                 onClick={() => imagesRef.current?.click()}
                 className="flex items-center gap-1 text-blue-500 hover:text-blue-600 text-xs font-semibold transition-colors"
