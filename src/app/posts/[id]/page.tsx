@@ -16,7 +16,7 @@ const TiptapEditor = dynamicImport(() => import("@/components/TiptapEditor"), { 
 const CATEGORIES: Record<string, string[]> = {
   "civismo-digital":  ["Análisis", "Observatorio", "Propuesta", "Comunicado", "Documental"],
   "impulso-sinaloa":  ["Noticias", "Proyectos", "Comunidad", "Gobierno", "Cultura"],
-  "brilloalsur":      ["Productos", "Tienda", "Historia", "Promo"],
+  "brilloalsur":      ["Comunicado", "Economía", "Agenda", "Propuesta", "Turismo", "Infraestructura"],
   "yumbalam":         ["Comunicado", "Propuesta", "Medio Ambiente", "Comunidad"],
 };
 
