@@ -50,6 +50,7 @@ export const SITES = [
   { id: "impulso-sinaloa",  label: "Impulso Sinaloa",   color: "bg-orange-500", url: "impulsosinaloa.com" },
   { id: "brilloalsur",      label: "Brillo al Sur",     color: "bg-yellow-500", url: "brilloalsur.com" },
   { id: "yumbalam",         label: "Frente Yum Balam",  color: "bg-green-600",  url: "frenteproyumbalam.org" },
+  { id: "voces-mahahual",   label: "Voces de Mahahual", color: "bg-sky-500",    url: "voces-mahahual.mwx.app" },
 ] as const;
 
 export async function getPosts(site?: string): Promise<Post[]> {
