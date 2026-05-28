@@ -18,6 +18,7 @@ const CATEGORIES: Record<string, string[]> = {
   "impulso-sinaloa":  ["Noticias", "Proyectos", "Comunidad", "Gobierno", "Cultura"],
   "brilloalsur":      ["Comunicado", "Economía", "Agenda", "Propuesta", "Turismo", "Infraestructura"],
   "yumbalam":         ["Comunicado", "Propuesta", "Medio Ambiente", "Comunidad"],
+  "voces-mahahual":   ["Comunicado", "Comunidad", "Propuesta", "Carta abierta", "Noticias"],
 };
 
 const empty = (): Partial<Post> => ({
